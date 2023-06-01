@@ -55,7 +55,7 @@ func getMovieByMood(c *gin.Context) {
 }
 
 func getExtendedMovieInfoFromAPI(movie string) string {
-	url := "https://imdb-api.com/en/API/SearchMovie/apiKey/title/" + movie
+	url := "http://www.omdbapi.com/?i=tt3896198&apikey=&plot=full&t=" + movie
 	res, err := http.Get(url)
 	if err != nil {
 		fmt.Printf("error making http request: %s\n", err)
@@ -63,17 +63,31 @@ func getExtendedMovieInfoFromAPI(movie string) string {
 	}
 	defer res.Body.Close()
 
-	fmt.Printf("client: got response!\n")
-	fmt.Printf("client: status code: %d\n", res.StatusCode)
+	if res.StatusCode != http.StatusOK {
+		fmt.Printf("unexpected response status code: %d\n", res.StatusCode)
+		return ""
+	}
 
-	// Process the response and return extended movie information
-	// ...
+	var response struct {
+		Title       string `json:"Title"`
+		Plot        string `json:"Plot"`
+		ReleaseYear string `json:"Year"`
+		// Add more fields as needed to capture the extended movie information
+	}
 
-	return ""
+	err = json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		fmt.Printf("error decoding response: %s\n", err)
+		return ""
+	}
+
+	extendedInfo := fmt.Sprintf("Title: %s\nPlot: %s\nRelease Year: %s", response.Title, response.Plot, response.ReleaseYear)
+
+	return extendedInfo
 }
 
 func getMovieFromLLM(mood string) string {
-	client := openai.NewClient("")
+	client := openai.NewClient("apikey")
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
