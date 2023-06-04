@@ -72,7 +72,6 @@ func getExtendedMovieInfoFromAPI(movie string) string {
 		Title       string `json:"Title"`
 		Plot        string `json:"Plot"`
 		ReleaseYear string `json:"Year"`
-		// Add more fields as needed to capture the extended movie information
 	}
 
 	err = json.NewDecoder(res.Body).Decode(&response)
