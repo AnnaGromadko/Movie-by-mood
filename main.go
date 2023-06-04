@@ -54,37 +54,6 @@ func getMovieByMood(c *gin.Context) {
 	})
 }
 
-func getExtendedMovieInfoFromAPI(movie string) string {
-	url := "http://www.omdbapi.com/?i=tt3896198&apikey=&plot=full&t=" + movie
-	res, err := http.Get(url)
-	if err != nil {
-		fmt.Printf("error making http request: %s\n", err)
-		return ""
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		fmt.Printf("unexpected response status code: %d\n", res.StatusCode)
-		return ""
-	}
-
-	var response struct {
-		Title       string `json:"Title"`
-		Plot        string `json:"Plot"`
-		ReleaseYear string `json:"Year"`
-	}
-
-	err = json.NewDecoder(res.Body).Decode(&response)
-	if err != nil {
-		fmt.Printf("error decoding response: %s\n", err)
-		return ""
-	}
-
-	extendedInfo := fmt.Sprintf("Title: %s\nPlot: %s\nRelease Year: %s", response.Title, response.Plot, response.ReleaseYear)
-
-	return extendedInfo
-}
-
 func getMovieFromLLM(mood string) string {
 	client := openai.NewClient("apikey")
 	resp, err := client.CreateChatCompletion(
@@ -118,4 +87,35 @@ func getMovieFromLLM(mood string) string {
 	}
 
 	return ""
+}
+
+func getExtendedMovieInfoFromAPI(movie string) string {
+	url := "http://www.omdbapi.com/?i=tt3896198&apikey=&plot=full&t=" + movie
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("error making http request: %s\n", err)
+		return ""
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		fmt.Printf("unexpected response status code: %d\n", res.StatusCode)
+		return ""
+	}
+
+	var response struct {
+		Title       string `json:"Title"`
+		Plot        string `json:"Plot"`
+		ReleaseYear string `json:"Year"`
+	}
+
+	err = json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		fmt.Printf("error decoding response: %s\n", err)
+		return ""
+	}
+
+	extendedInfo := fmt.Sprintf("Title: %s\nPlot: %s\nRelease Year: %s", response.Title, response.Plot, response.ReleaseYear)
+
+	return extendedInfo
 }
